@@ -1,0 +1,13 @@
+#!/bin/sh
+
+tempdir="/tmp/thumbs"
+
+rm -rf $tempdir/*
+
+[ ! -d $tempdir ] && mkdir -p $tempdir
+
+for f in "$@"; do
+	pdfimages -f 1 -l 1 "$f" "$tempdir/${f%.pdf}"
+done
+
+sxiv -t $tempdir/* &	

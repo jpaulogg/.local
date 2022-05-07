@@ -1,0 +1,40 @@
+#!/bin/sh
+set +C
+
+# man(1)
+TMP_FILE=$(mktemp)
+MAN_DUMP=$XDG_CACHE_HOME/man
+
+[ ! -f "$MAN_DUMP" ] && echo -n > $MAN_DUMP
+
+tail -n 1000 $HISTFILE \
+	| grep "^man [a-zA-Z12-]\{4,\}" \
+	| cut -d ' ' -f 2 > $TMP_FILE
+
+cat $MAN_DUMP >> $TMP_FILE
+sort -u $TMP_FILE > $MAN_DUMP
+
+# dicionários
+#list_words() {
+#	
+#	local ext=$1
+#	shift
+#
+#	local pattern='[:alpha:].:_-'
+#	local tr_flags='-s'
+#	case in $ext
+#		*.txt|*.md) pattern="[:blank:][:punct:]" ;;
+#		*) tr_flags='-cs' ;;
+#	esac
+#
+#	find $@ -name "*.$ext" -exec cat '{}' \; \
+#	| tr $tr_flags "$pattern" '\n' \
+#	| grep ".\{4,\}" \
+#	| sed "/[^aeiou:._-]\{4,\}/d" > $TMP_FILE
+#
+#	{ tr -s ':._-' '\n' < $TMP_FILE; cat $TMP_FILE; } | sort -u
+#}
+#
+#list_words md ~/documentos/fichas ~/estudos 
+
+rm -f $TMP_FILE

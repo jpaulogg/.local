@@ -1,0 +1,46 @@
+#!/bin/sh
+
+# Pausa, inicia e finaliza scripts que enviaram seu PID para o arquivo /tmp/pid2killmenu
+
+# variáveis inicias
+MYPID=$(cat /tmp/pid2killmenu) 2> /dev/null
+[ -z $MYPID ] && notify-send "Processo inexistente" && exit 1
+PSTATUS="$(ps -o state= -p $MYPID)"
+PNAME="$(ps -p ${MYPID} -o comm=)"
+
+# SIGSTOP
+stop() {
+	[ "$PSTATUS" = "T" ] && notify-send "$PNAME já está pausado" && exit 1
+	notify-send "Pausando ${PNAME}"
+	kill -19 "$MYPID"
+}
+
+# SIGCONT
+cont() {
+	[ ! "$PSTATUS" = "T" ] && notify-send "$PNAME não está parado" && exit 1
+	notify-send -t 1000 "Retomando $PNAME em 2 segundos"
+	kill -18 "$MYPID"
+}
+
+# SIGTERM e SIGKILL
+term() {
+	notify-send "Finalizando o processo $PNAME"
+	# terminar processo de maneira mais "suave", com SIGTERM
+	kill -15 "$MYPID" && rm -f /tmp/pid2killmenu
+	# o processo pode continuar ainda assim; forçar a finalização com SIGKILL
+	sleep 3
+	kill -9 "$MYPID"
+	exit 0
+}
+
+# menu de opções
+OPTION="${1:-`echo 'Pausar\nRetomar\nFinalizar' | dmenu -p 'kill SIG:'`}" || exit 1
+
+case "$OPTION" in
+	Pausar|-stop)  rtop;;
+	Retomar|-cont) cont;;
+	Finalizar|-term) term;;
+	-toggle) [ "$PSTATUS" = "T" ] && cont || stop;;
+esac
+
+exit 0

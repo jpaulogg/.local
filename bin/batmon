@@ -1,0 +1,22 @@
+#!/bin/sh
+
+LIMIT=20
+
+read STATUS < "/sys/devices/LNXSYSTM:00/LNXSYBUS:00/PNP0A08:00/device:08/PNP0C09:00/PNP0C0A:00/power_supply/BAT0/status"
+read CAPACITY < "/sys/devices/LNXSYSTM:00/LNXSYBUS:00/PNP0A08:00/device:08/PNP0C09:00/PNP0C0A:00/power_supply/BAT0/capacity"
+
+case "$STATUS" in
+	[Dd]*)
+		if [ $CAPACITY -le $LIMIT ]; then
+			herbe "CARREGAR A BATERIA"
+			sleep 5m
+		else
+			sleep 10m
+		fi
+		;;
+	*)
+		sleep 20m
+		;;
+esac
+
+exec $0

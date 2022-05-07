@@ -1,0 +1,20 @@
+[submodule "src/slstatus"]
+	path = src/slstatus
+	url = https://github.com/jpaulogg/slstatus.git
+	branch = mybuild
+[submodule "src/vis"]
+	path = src/vis
+	url = https://github.com/jpaulogg/vis.git
+	branch = mybuild
+[submodule "src/dwm"]
+	path = src/dwm
+	url = https://github.com/jpaulogg/dwm.git
+	branch = mybuild
+[submodule "src/dmenu"]
+	path = src/dmenu
+	url = https://github.com/jpaulogg/dmenu.git
+	branch = mybuild
+[submodule "src/st"]
+	path = src/st
+	url = https://github.com/jpaulogg/st.git
+	branch = mybuild

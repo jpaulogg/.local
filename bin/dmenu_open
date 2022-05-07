@@ -1,0 +1,34 @@
+#!/bin/sh
+set -e
+
+# Requires:
+# dmenu with the "center" and the "border" patches;
+# GNU coreutils - ls(1) with "--group-directories-first" option
+# xdg-utils or a custom xdg-open script.
+
+usage() {
+	cat <<-EOF
+	usage: ${0##*/} [path]
+	Explore directories using dmenu(1) and open files using xdg-open(1).
+	EOF
+}
+
+wrap_dirs() { find "$@" -maxdepth 0 -type d -printf "%p/\n" -o -print; }
+
+alias dmenu='dmenu -sb "#458588" -p "open:" -l 25'
+
+if [ $# -gt 1 ]; then
+	CHOICE=$(wrap_dirs ".." "$@"  | dmenu)
+else
+	case "$1" in
+		-h|--help) usage; exit 0 ;;
+		*) CHOICE="${1-$PWD/}" ;;
+	esac
+fi
+
+while [ -d "$CHOICE" ]; do
+	cd -P "$CHOICE"
+	CHOICE=$({ echo "../"; ls -1p --group-directories-first; } | dmenu)
+done
+
+xdg-open "$CHOICE"

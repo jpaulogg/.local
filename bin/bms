@@ -1,0 +1,3 @@
+#!/bin/sh
+
+dmenu -l 8 < "$XDG_DATA_HOME/bookmarks.list" | xsel -i -b

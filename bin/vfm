@@ -1,0 +1,77 @@
+#!/bin/sh
+set -e -f
+
+usage() {
+	cat <<-EOF
+	Usage: ${0##*/} [-c cp|rm|mv|ln...]
+	
+	File management using vis(1) as an interactive filter.
+	The special file '-' instructs vis to read from standard input
+	in which case ':wq' will write to standard output and ':q!' won't.
+
+	vfm -c cmd [args]) pass vis output to 'cmd' using xargs(1)
+	        TIPS: In visual mode, '~' complements selections;
+	              You can use xargs options ("-I" can be usefull).
+	
+	vfm) bulk management ("old" and "new" values of each line are compared)
+	        WARNINGS: you can't overwrite existing files in this mode;
+	                  you can't remove directories in this mode;
+	                  Delete a line with 'dd' to ABORT all changes.
+	        OPERATIONS:
+	        REMOVE --> new == null (delete line content with 'dil' or '0d$');
+	        RENAME --> dirname(1) new == dirname(1) old;
+	        COPY   --> dirname(1) new != dirname(1) old.
+	EOF
+}
+
+input='/tmp/vfm-input'
+output='/tmp/vfm-output'
+
+# Command line options
+if [ $# -gt 0 ]; then
+	if [ "$1" = "-c" ]; then
+		shift
+		cmd=$*
+	else
+		usage
+		exit 1
+	fi
+fi
+
+# If standard input is empty, use 'ls' output 
+if [ -t 0 ]; then
+	ls -1p | tee $input | vis - > $output
+else
+	stest -e | tee $input | vis - > $output
+fi
+
+[ ! -s $output ] && echo "No file selected." && exit 1
+
+# COMMAND MODE: pass vis output to 'cmd' using xargs(1) and exit
+if [ -n "$cmd" ]; then
+	tr -s "\n" "\0" | xargs -0 $cmd
+	exit 0
+fi
+
+# BULK MANAGEMENT: "old" and "new" values of each line are compared
+[ $(wc -l < $input) -ne $(wc -l < $output) ] \
+	&& echo "Number of input and output lines should be equal. Aborting." && exit 1
+
+exec 3< $output
+IFS='
+'
+
+while read old; do
+	read new <&3
+	# Avoid redundancies and never overwrite files
+	if [ "$old" != "$new" -a ! -e "$new" ]; then
+		if [ -z "$new" ]; then
+			rm -v "$old"
+		else
+			mv -v "$old" "$new"
+		fi
+	fi
+done < $input
+
+exec 3<&-
+rm -f $input $output

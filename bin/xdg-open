@@ -1,0 +1,14 @@
+#!/bin/sh
+
+[ $# -lt 1 ] && exit 1
+
+case "$1" in
+	*.pdf) mupdf-gl "$1" ;;
+	*.doc|*.docx|*.odt) lowriter "$1" ;;
+	*.xls|*.xlsx|*.ods) localc "$1" ;;
+	*.txt) ${EDITOR:-vi} "$1" ;;
+	*.png|*.jpg|*.jpeg) sxiv "$1" ;;
+	*.mp4|*.mkv) mpv "$1" ;;
+	http*) $BROWSER "$1" ;;
+	*) [ -d "$1" ] && cd "$1" && st ;;
+esac

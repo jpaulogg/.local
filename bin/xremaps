@@ -1,0 +1,16 @@
+#!/bin/sh
+exec > /dev/null 2> /dev/null
+
+# Teclado brasileiro como padrão e estadunidense como alternativo
+setxkbmap br,us abnt2,intl
+setxkbmap -option grp:shift_toggle -option grp_led:scroll
+
+# CapsLock para 'Control' e 'Direita'
+setxkbmap -option ctrl:swapcaps
+
+# Adicionar Shift ao Tab
+xmodmap -e "keycode 93 = Tab"
+xmodmap -e "clear Shift"
+xmodmap -e "keycode 23 = Shift_R"
+xmodmap -e "add Shift = Shift_R"
+xcape -e 'Shift_R=Tab'

@@ -1,0 +1,7 @@
+#!/bin/sh
+
+# cria uma instância do mpv com a entrada de vídeo da webcam
+# creates a mpv instance with the webcam video
+
+mpv --no-cache --no-osc --no-input-default-bindings --profile=low-latency \
+	--input-conf=/dev/null --title='webcam' /dev/video0 --geometry=500x375-0-0
